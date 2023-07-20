@@ -1,14 +1,12 @@
 # Mandelbrot Set Renderer
 
-![Mandelbrot Set](mandelbrot.png)
-
 This repository contains a simple Mandelbrot set renderer written in Rust. It allows you to visualize the Mandelbrot set and zoom into various regions.
 
 ## Requirements
 
 - Rust (1.55.0 or higher)
 - Cargo (Rust's package manager)
-- Git (only required if you plan to clone the repository)
+- Git
 
 ## Building and Running
 
