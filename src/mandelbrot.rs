@@ -1,31 +1,27 @@
 // src/mandelbrot.rs
 
+use rayon::prelude::*;
 use rand::prelude::*;
 
 /// Check if the given complex number `c` is in the Mandelbrot set.
 fn is_mandelbrot(c: (f64, f64)) -> bool {
     // Maximum number of iterations to determine if `c` is in the set.
     const MAX_ITERATIONS: u32 = 1000;
-
     // Start with z = 0 + 0i
     let (mut zr, mut zi) = (0.0, 0.0);
-
     // Iterate to determine if `c` is in the set.
     for i in 0..MAX_ITERATIONS {
         // Mandelbrot iteration formula: z = z^2 + c
         let zr_new = zr * zr - zi * zi + c.0;
         let zi_new = 2.0 * zr * zi + c.1;
-
         // Update the real and imaginary parts with the new values.
         zr = zr_new;
         zi = zi_new;
-
         // If the magnitude of z exceeds 2, `c` is not in the Mandelbrot set.
         if zr * zr + zi * zi > 4.0 {
             return false;
         }
     }
-
     // If the loop completes, `c` is considered in the Mandelbrot set.
     true
 }
@@ -64,7 +60,6 @@ fn rainbow_color(iterations: u32, max_iterations: u32) -> u32 {
 pub fn render_mandelbrot(width: usize, height: usize) -> Vec<u32> {
     // Initialize a pixel buffer to store the colors of each pixel.
     let mut pixels = vec![0; width * height];
-
     // Set the offset and scaling factors for the Mandelbrot set coordinates.
     let x_offset = -2.5;
     let y_offset = -1.5;
@@ -73,37 +68,33 @@ pub fn render_mandelbrot(width: usize, height: usize) -> Vec<u32> {
 
     // Maximum number of iterations to determine if a point is in the Mandelbrot set.
     const MAX_ITERATIONS: u32 = 1000;
+    // Precalculate colors for all iterations
+    let colors: Vec<u32> = (0..=MAX_ITERATIONS)
+        .map(|i| rainbow_color(i, MAX_ITERATIONS))
+        .collect();
 
-    // Loop through each pixel in the buffer.
-    for y in 0..height {
-        for x in 0..width {
-            // Map the pixel coordinates to the corresponding complex number `c`.
+    // Loop through each pixel in the buffer using parallel processing.
+    pixels.par_chunks_mut(width).enumerate().for_each(|(y, row)| {
+        let cy = y as f64 * y_scale + y_offset;
+        for (x, pixel) in row.iter_mut().enumerate() {
             let cx = x as f64 * x_scale + x_offset;
-            let cy = y as f64 * y_scale + y_offset;
-
             // Start with z = 0 + 0i
             let (mut zr, mut zi) = (0.0, 0.0);
-
             // Iterate to determine if `c` is in the set and calculate the iteration count.
             let mut i = 0;
             while i < MAX_ITERATIONS && zr * zr + zi * zi <= 4.0 {
                 // Mandelbrot iteration formula: z = z^2 + c
                 let zr_new = zr * zr - zi * zi + cx;
                 let zi_new = 2.0 * zr * zi + cy;
-
                 // Update the real and imaginary parts with the new values.
                 zr = zr_new;
                 zi = zi_new;
-
                 i += 1;
             }
-
             // Get the rainbow color for the current pixel based on the iteration count.
-            let color = rainbow_color(i, MAX_ITERATIONS);
-            pixels[y * width + x] = color;
+            *pixel = colors[i as usize];
         }
-    }
-
+    });
     // Return the completed pixel buffer with rainbow colors.
     pixels
 }
@@ -117,7 +108,6 @@ pub fn render_mandelbrot_with_params(
 ) -> Vec<u32> {
     // Initialize a pixel buffer to store the colors of each pixel.
     let mut pixels = vec![0; width * height];
-
     // Calculate the offset and scaling factors based on the center coordinates and zoom level.
     let x_offset = center_x - 1.5 / zoom;
     let y_offset = center_y - 1.0 / zoom;
@@ -126,37 +116,33 @@ pub fn render_mandelbrot_with_params(
 
     // Maximum number of iterations to determine if a point is in the Mandelbrot set.
     const MAX_ITERATIONS: u32 = 1000;
+    // Precalculate colors for all iterations
+    let colors: Vec<u32> = (0..=MAX_ITERATIONS)
+        .map(|i| rainbow_color(i, MAX_ITERATIONS))
+        .collect();
 
-    // Loop through each pixel in the buffer.
-    for y in 0..height {
-        for x in 0..width {
-            // Map the pixel coordinates to the corresponding complex number `c`.
+    // Loop through each pixel in the buffer using parallel processing.
+    pixels.par_chunks_mut(width).enumerate().for_each(|(y, row)| {
+        let cy = y as f64 * y_scale + y_offset;
+        for (x, pixel) in row.iter_mut().enumerate() {
             let cx = x as f64 * x_scale + x_offset;
-            let cy = y as f64 * y_scale + y_offset;
-
             // Start with z = 0 + 0i
             let (mut zr, mut zi) = (0.0, 0.0);
-
             // Iterate to determine if `c` is in the set and calculate the iteration count.
             let mut i = 0;
             while i < MAX_ITERATIONS && zr * zr + zi * zi <= 4.0 {
                 // Mandelbrot iteration formula: z = z^2 + c
                 let zr_new = zr * zr - zi * zi + cx;
                 let zi_new = 2.0 * zr * zi + cy;
-
                 // Update the real and imaginary parts with the new values.
                 zr = zr_new;
                 zi = zi_new;
-
                 i += 1;
             }
-
             // Get the rainbow color for the current pixel based on the iteration count.
-            let color = rainbow_color(i, MAX_ITERATIONS);
-            pixels[y * width + x] = color;
+            *pixel = colors[i as usize];
         }
-    }
-
+    });
     // Return the completed pixel buffer with rainbow colors.
     pixels
 }
