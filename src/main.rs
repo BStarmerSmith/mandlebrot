@@ -89,9 +89,13 @@ fn main() {
     )
     .unwrap_or_else(|e| panic!("{}", e));
 
-    let mut center_x: f64 = -0.5;
-    let mut center_y: f64 = 0.0;
-    let mut zoom: f64 = 1.0;
+    let mut initial_center_x: f64 = -0.5;
+    let mut initial_center_y: f64 = 0.0;
+    let mut initial_zoom: f64 = 1.0;
+    // Save the initial state
+    let mut center_x = initial_center_x;
+    let mut center_y = initial_center_y;
+    let mut zoom = initial_zoom;
 
     let mut last_frame_time = Instant::now();
 
@@ -109,6 +113,12 @@ fn main() {
         handle_navigation_and_zoom(&window, &mut center_x, &mut center_y, &mut zoom);
         // Handling mouse interaction for movement and zooming
         handle_mouse_interaction(&mut window, &mut center_x, &mut center_y, &mut zoom);
+        // Reset to initial settings if right mouse button is pressed
+        if window.get_mouse_down(MouseButton::Right) {
+            center_x = initial_center_x;
+            center_y = initial_center_y;
+            zoom = initial_zoom;
+        }
         // Rendering the Mandelbrot set with the updated parameters
         buffer = mandelbrot::render_mandelbrot_with_params(WIDTH, HEIGHT, center_x, center_y, zoom);
         // Updating the window display with the rendered buffer
