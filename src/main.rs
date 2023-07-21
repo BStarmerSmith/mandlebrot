@@ -98,6 +98,9 @@ fn handle_mouse_interaction(
     }
 }
 
+// TODO: Add a function to handle keyboard input for saving the current image
+// TODO: Add a function to to automate a zoom sequence
+
 fn main() {
     const WIDTH: usize = 800;
     const HEIGHT: usize = 600;
