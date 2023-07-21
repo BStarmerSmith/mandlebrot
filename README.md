@@ -50,4 +50,5 @@ cargo run --release
 
 - Use arrow keys or hold left click and move the mouse to navigate the view.
 - Use the '+' and '-' keys or scrollwheel to zoom in and out, respectively.
+- Right click the mouse to reset back to start position
 - Press 'Esc' to exit the program.
