@@ -7,7 +7,18 @@ use std::time::{Duration, Instant};
 use rayon::prelude::*; // Import the Rayon prelude
 use rayon::ThreadPoolBuilder;
 
-// Function to handle navigation and zooming
+/// Function to handle navigation and zooming based on keyboard input.
+///
+/// This function takes the current window, center coordinates, and zoom level as input and
+/// handles navigation and zooming based on the arrow keys for movement and '+'/'-' keys for zooming.
+/// The function updates the center coordinates and zoom level accordingly.
+///
+/// # Arguments
+///
+/// * `window` - A reference to the minifb window.
+/// * `center_x` - A mutable reference to the x-coordinate of the center of the Mandelbrot set.
+/// * `center_y` - A mutable reference to the y-coordinate of the center of the Mandelbrot set.
+/// * `zoom` - A mutable reference to the zoom level of the Mandelbrot set.
 fn handle_navigation_and_zoom(window: &Window, center_x: &mut f64, center_y: &mut f64, zoom: &mut f64) {
     const ZOOM_FACTOR: f64 = 1.1;
     const NAVIGATION_STEP: f64 = 0.2;
@@ -33,7 +44,19 @@ fn handle_navigation_and_zoom(window: &Window, center_x: &mut f64, center_y: &mu
     }
 }
 
-// Function to handle mouse interaction for movement and zooming
+/// Function to handle mouse interaction for movement and zooming.
+///
+/// This function takes the current window, center coordinates, and zoom level as input and
+/// handles mouse interaction for movement and zooming. It calculates the mouse movement distance,
+/// scales it based on the zoom level, and adjusts the center coordinates accordingly. It also
+/// adjusts the zoom level based on mouse scroll wheel movement.
+///
+/// # Arguments
+///
+/// * `window` - A mutable reference to the minifb window.
+/// * `center_x` - A mutable reference to the x-coordinate of the center of the Mandelbrot set.
+/// * `center_y` - A mutable reference to the y-coordinate of the center of the Mandelbrot set.
+/// * `zoom` - A mutable reference to the zoom level of the Mandelbrot set.
 fn handle_mouse_interaction(
     window: &mut Window,
     center_x: &mut f64,
@@ -74,6 +97,9 @@ fn handle_mouse_interaction(
         }
     }
 }
+
+// TODO: Add a function to handle keyboard input for saving the current image
+// TODO: Add a function to to automate a zoom sequence
 
 fn main() {
     const WIDTH: usize = 800;
