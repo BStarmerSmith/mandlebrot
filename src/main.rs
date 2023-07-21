@@ -2,7 +2,7 @@
 
 mod mandelbrot;
 
-use minifb::{Key, Window, WindowOptions};
+use minifb::{Key, MouseButton, Window, WindowOptions, MouseMode};
 use std::time::{Duration, Instant};
 use rayon::prelude::*; // Import the Rayon prelude
 use rayon::ThreadPoolBuilder;
@@ -30,6 +30,48 @@ fn handle_navigation_and_zoom(window: &Window, center_x: &mut f64, center_y: &mu
     }
     if window.is_key_down(Key::Minus) || window.is_key_down(Key::Comma) {
         *zoom *= ZOOM_FACTOR;
+    }
+}
+
+// Function to handle mouse interaction for movement and zooming
+fn handle_mouse_interaction(
+    window: &mut Window,
+    center_x: &mut f64,
+    center_y: &mut f64,
+    zoom: &mut f64,
+) {
+    const ZOOM_FACTOR: f64 = 1.2; // Adjust the zoom factor for smooth zooming
+    const BASE_SENSITIVITY: f64 = 0.00005; // Adjust the base mouse movement sensitivity
+    // Get mouse events
+    let (mouse_x, mouse_y) = window.get_mouse_pos(MouseMode::Clamp).unwrap();
+    let (window_width, window_height) = window.get_size();
+
+    if window.get_mouse_down(MouseButton::Left) {
+        // Calculate the base sensitivity based on the current zoom level
+        let base_sensitivity = BASE_SENSITIVITY / *zoom;
+        // Scale the sensitivity based on the zoom level
+        let sensitivity = base_sensitivity * *zoom;
+
+        // Calculate the movement distance based on mouse position and sensitivity
+        let dx = (mouse_x as f64 - window_width as f64 / 2.0) * sensitivity;
+        let dy = (mouse_y as f64 - window_height as f64 / 2.0) * sensitivity;
+        // Calculate the maximum allowed movement distance based on the current zoom level and window size
+        let max_dx = window_width as f64 / (2.0 * *zoom);
+        let max_dy = window_height as f64 / (2.0 * *zoom);
+        // Adjust the center coordinates based on mouse movement, clamping within bounds
+        *center_x += dx.clamp(-max_dx, max_dx);
+        *center_y += dy.clamp(-max_dy, max_dy);
+    }
+
+    if let Some((wheel_delta_x, wheel_delta_y)) = window.get_scroll_wheel() {
+        if wheel_delta_y != 0.0 {
+            // Adjust the zoom level based on the direction of the wheel
+            if wheel_delta_y > 0.0 {
+                *zoom *= ZOOM_FACTOR;
+            } else {
+                *zoom /= ZOOM_FACTOR;
+            }
+        }
     }
 }
 
@@ -65,6 +107,8 @@ fn main() {
         last_frame_time = Instant::now();
         // Handling navigation and zooming
         handle_navigation_and_zoom(&window, &mut center_x, &mut center_y, &mut zoom);
+        // Handling mouse interaction for movement and zooming
+        handle_mouse_interaction(&mut window, &mut center_x, &mut center_y, &mut zoom);
         // Rendering the Mandelbrot set with the updated parameters
         buffer = mandelbrot::render_mandelbrot_with_params(WIDTH, HEIGHT, center_x, center_y, zoom);
         // Updating the window display with the rendered buffer
