@@ -80,7 +80,6 @@ fn main() {
     const HEIGHT: usize = 600;
     const MAX_FPS: u64 = 60; // Cap the frame rate at 60 FPS
     let mut buffer: Vec<u32> = mandelbrot::render_mandelbrot(WIDTH, HEIGHT);
-
     let mut window = Window::new(
         "Mandelbrot Set",
         WIDTH,
@@ -97,6 +96,10 @@ fn main() {
     let mut center_y = initial_center_y;
     let mut zoom = initial_zoom;
 
+    // Initialize Rayon only if it's not already initialized
+    if !ThreadPoolBuilder::default().build_global().is_ok() {
+        println!("Rayon global thread pool already initialized.");
+    }
     let mut last_frame_time = Instant::now();
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
